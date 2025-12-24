@@ -1,0 +1,23 @@
+2025/12/24 23:55:17 [error] 39674#39674: *1 failed to load external Lua file "/home/uranus/codes/WAF/lua/waf.lua": cannot open /home/uranus/codes/WAF/lua/waf.lua: Permission denied, client: 127.0.0.1, server: , request: "GET /test HTTP/1.1", host: "localhost:8080"
+2025/12/24 23:55:17 [info] 39674#39674: *1 client 127.0.0.1 closed keepalive connection
+2025/12/25 00:00:02 [error] 41945#41945: *1 failed to load external Lua file "/home/uranus/codes/WAF/lua/waf.lua": cannot open /home/uranus/codes/WAF/lua/waf.lua: Permission denied, client: 127.0.0.1, server: , request: "GET /test HTTP/1.1", host: "localhost:8080"
+2025/12/25 00:00:02 [info] 41945#41945: *1 client 127.0.0.1 closed keepalive connection
+2025/12/25 00:07:28 [emerg] 46057#46057: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2025/12/25 00:07:28 [emerg] 46057#46057: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2025/12/25 00:07:28 [emerg] 46057#46057: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2025/12/25 00:07:28 [emerg] 46057#46057: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2025/12/25 00:07:28 [emerg] 46057#46057: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2025/12/25 00:07:28 [emerg] 46057#46057: still could not bind()
+2025/12/25 00:07:58 [error] 46365#46365: *1 failed to load external Lua file "/home/uranus/codes/WAF/lua/waf.lua": cannot open /home/uranus/codes/WAF/lua/waf.lua: Permission denied, client: 127.0.0.1, server: , request: "GET /test HTTP/1.1", host: "localhost:8080"
+2025/12/25 00:07:58 [info] 46365#46365: *1 client 127.0.0.1 closed keepalive connection
+2025/12/25 00:11:57 [info] 48592#48592: *1 [lua] waf.lua:7: [WAF] Request received, client: 127.0.0.1, server: , request: "GET /test HTTP/1.1", host: "localhost:8080"
+2025/12/25 00:11:57 [info] 48592#48592: *1 [lua] waf.lua:17: [WAF] 127.0.0.1 GET /test, client: 127.0.0.1, server: , request: "GET /test HTTP/1.1", host: "localhost:8080"
+2025/12/25 00:11:57 [info] 48592#48592: *1 client 127.0.0.1 closed keepalive connection
+2025/12/25 00:13:25 [info] 48593#48593: *3 [lua] waf.lua:7: [WAF] Request received, client: 127.0.0.1, server: , request: "GET / HTTP/1.1", host: "localhost:8080"
+2025/12/25 00:13:25 [info] 48593#48593: *3 [lua] waf.lua:17: [WAF] 127.0.0.1 GET /, client: 127.0.0.1, server: , request: "GET / HTTP/1.1", host: "localhost:8080"
+2025/12/25 00:13:25 [info] 48593#48593: *3 client 127.0.0.1 closed keepalive connection
+2025/12/25 00:17:44 [notice] 51563#51563: signal process started
+2025/12/25 00:17:58 [info] 51565#51565: *5 [lua] waf.lua:6: [WAF] Request received, client: 127.0.0.1, server: , request: "GET /echo?name=<script>alert(1)</script> HTTP/1.1", host: "localhost:8080"
+2025/12/25 00:17:58 [info] 51565#51565: *5 [lua] waf.lua:15: [WAF] 127.0.0.1 GET /echo?name=<script>alert(1)</script>, client: 127.0.0.1, server: , request: "GET /echo?name=<script>alert(1)</script> HTTP/1.1", host: "localhost:8080"
+2025/12/25 00:17:58 [warn] 51565#51565: *5 [lua] waf.lua:43: [WAF] Blocked XSS attack from 127.0.0.1, param: name, client: 127.0.0.1, server: , request: "GET /echo?name=<script>alert(1)</script> HTTP/1.1", host: "localhost:8080"
+2025/12/25 00:17:58 [info] 51565#51565: *5 client 127.0.0.1 closed keepalive connection
