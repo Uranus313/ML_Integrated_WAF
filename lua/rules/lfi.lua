@@ -12,7 +12,7 @@ local patterns = {
 }
 
 function _M.check(req, state)
-    local payload = normalize.prepare(req.payload)
+    local payload = req.payload
 
 
     for _, pat in ipairs(patterns) do

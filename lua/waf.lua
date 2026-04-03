@@ -1,61 +1,109 @@
 -- Main WAF entry (modular)
 local scoring = require("scoring")
 local logger  = require("utils.logger")
-
+local crs = require("conf.crs")
+local normalize = require("utils.normalize")
+local cjson = require("cjson.safe")
 -- Load all rule modules
-local rules = {
-    require("rules.xss"),
-    require("rules.sqli"),
-    require("rules.lfi"),
-}
+-- local rules = {
+--     require("rules.xss"),
+--     require("rules.sqli"),
+--     require("rules.lfi"),
+-- }
+
+
+local rules = {}
+
+if crs.enabled_categories.xss then
+    table.insert(rules, require("rules.xss"))
+end
+if crs.enabled_categories.sqli then
+    table.insert(rules, require("rules.sqli"))
+end
+if crs.enabled_categories.lfi then
+    table.insert(rules, require("rules.lfi"))
+end
+
+
+-- Flatten query args safely
+local function flatten_args(t)
+    local list = {}
+
+    local function recurse(val)
+        if type(val) == "table" then
+            for _, v in pairs(val) do
+                recurse(v)
+            end
+        else
+            table.insert(list, tostring(val))
+        end
+    end
+
+    recurse(t)
+    return table.concat(list, " ")
+end
+-- Flatten headers safely
+local function flatten_headers(headers)
+    local list = {}
+    for k, v in pairs(headers or {}) do
+        if type(v) == "table" then
+            v = table.concat(v, " ")
+        end
+        if v then
+            table.insert(list, v)
+        end
+    end
+    return table.concat(list, " ")
+end
 
 -- Read request info
-ngx.req.read_body()
 ngx.req.read_body()
 
 local uri = ngx.var.request_uri or ""
 local args = ngx.req.get_uri_args()
 local body = ngx.req.get_body_data() or ""
 
-local req_body = ngx.req.get_body_data()
-
--- Flatten query args safely
-local function flatten_args(t)
-    local list = {}
-    for k, v in pairs(t) do
-        if type(v) == "table" then
-            for _, sub in pairs(v) do
-                table.insert(list, tostring(sub))
-            end
-        else
-            table.insert(list, tostring(v))
-        end
-    end
-    return table.concat(list, " ")
+local parsed = cjson.decode(body)
+if parsed then
+    body = body .. " " .. flatten_args(parsed)
 end
+
 
 local req = {
     ip = ngx.var.remote_addr,
     method = ngx.req.get_method(),
     uri = uri,
     query = args,
-    body = body,
-    payload = uri .. " " .. flatten_args(args) .. " " .. body
+    body = body
+    -- payload = uri .. " " .. flatten_args(args) .. " " .. body
 }
 
--- local req = {
---     ip = ngx.var.remote_addr,
---     method = ngx.req.get_method(),
---     uri = ngx.var.request_uri,
---     ua = ngx.var.http_user_agent,
---     body = req_body
--- }
+local headers = ngx.req.get_headers()
+req.headers = headers
+req.ua = headers["user-agent"] or ""
+req.cookies = headers["cookie"] or ""
 
+-- req.payload = req.payload .. " " .. req.ua .. " " .. req.cookies
+-- for k, v in pairs(headers) do
+--     if type(v) == "table" then
+--         v = table.concat(v, " ")
+--     end
+--     req.payload = req.payload .. " " .. tostring(v)
+-- end
+req.payload = table.concat({
+    uri,
+    flatten_args(args),
+    body,
+    req.ua,
+    req.cookies,
+    flatten_headers(headers)
+}, " ")
 -- Initialize threat scoring
 local state = scoring.new()
-
+logger.warn(req.payload)
 -- Log the incoming request
 logger.info("Request received", { ip = req.ip, method = req.method, uri = req.uri })
+req.payload = normalize.prepare(req.payload, state)
 
 -- Run all rules
 for _, rule in ipairs(rules) do
@@ -63,11 +111,12 @@ for _, rule in ipairs(rules) do
 end
 
 -- If score exceeds threshold, block
-if scoring.should_block(state, 2) then
+if scoring.should_block(state, crs.anomaly_threshold) then
     logger.warn("Request blocked", { ip = req.ip, score = state.score, reasons = state.reasons })
-    ngx.status = 403
+    ngx.status = ngx.HTTP_FORBIDDEN
+    ngx.header["Content-Type"] = "text/plain"
     ngx.say("Forbidden")
-    return ngx.exit(403)
+    return ngx.exit(ngx.HTTP_FORBIDDEN)
 end
 
 -- Request allowed
