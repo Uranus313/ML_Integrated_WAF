@@ -22,7 +22,7 @@ function _M.check(req, state)
     local payload = req.payload
     -- local payload = normalize.prepare(req.payload, state)
     -- payload = fuzz_payload(payload)
-    logger.warn(payload)
+    -- logger.warn(payload)
 
     for _, pat in ipairs(patterns) do
         if payload:find(pat, 1, true) then

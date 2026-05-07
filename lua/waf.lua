@@ -100,7 +100,7 @@ req.payload = table.concat({
 }, " ")
 -- Initialize threat scoring
 local state = scoring.new()
-logger.warn(req.payload)
+-- logger.warn(req.payload)
 -- Log the incoming request
 logger.info("Request received", { ip = req.ip, method = req.method, uri = req.uri })
 req.payload = normalize.prepare(req.payload, state)
