@@ -38,7 +38,7 @@ function M.run()
     end
 
     -- 3. LOG IT (dataset creation step)
-    logger.write(tx)
+    logger.write_async(tx)
 
     return tx
 end

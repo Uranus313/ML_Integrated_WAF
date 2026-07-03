@@ -25,4 +25,10 @@ function M.write(tx)
     file:close()
 end
 
+function M.write_async(tx)
+    ngx.timer.at(0, function()
+        M.write(tx)
+    end)
+end
+
 return M
