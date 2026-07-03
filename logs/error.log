@@ -378,3 +378,44 @@ coroutine 0:
 2026/04/04 02:26:09 [warn] 9445#9445: *82 [lua] logger.lua:8: warn(): [WAF] SQLi pattern detected | {"pattern":"or 1=1","uri":"\/echo"}, client: 127.0.0.1, server: , request: "GET /echo HTTP/1.1", host: "localhost:8080"
 2026/04/04 02:26:09 [warn] 9445#9445: *82 [lua] logger.lua:8: warn(): [WAF] Request blocked | {"score":4,"reasons":["sqli:or 1=1"],"ip":"127.0.0.1"}, client: 127.0.0.1, server: , request: "GET /echo HTTP/1.1", host: "localhost:8080"
 2026/04/04 02:26:09 [info] 9445#9445: *82 client 127.0.0.1 closed keepalive connection
+2026/06/29 14:12:28 [emerg] 24480#0: module "/mnt/d/codes/WAF/modules/ngx_http_modsecurity_module.so" version 1028003 instead of 1027001 in /mnt/d/codes/WAF/conf/nginx.conf:2
+2026/06/29 14:13:09 [notice] 24545#0: ModSecurity-nginx v1.0.4 (rules loaded inline/local/remote: 0/0/0)
+2026/06/29 14:13:09 [notice] 24545#0: libmodsecurity3 version 3.0.14
+2026/06/29 14:13:29 [notice] 24593#0: ModSecurity-nginx v1.0.4 (rules loaded inline/local/remote: 0/0/0)
+2026/06/29 14:13:29 [notice] 24593#0: libmodsecurity3 version 3.0.14
+2026/06/29 14:13:31 [notice] 24628#0: ModSecurity-nginx v1.0.4 (rules loaded inline/local/remote: 0/0/0)
+2026/06/29 14:13:31 [notice] 24628#0: libmodsecurity3 version 3.0.14
+2026/06/29 14:13:31 [emerg] 24628#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2026/06/29 14:13:31 [emerg] 24628#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2026/06/29 14:13:31 [emerg] 24628#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2026/06/29 14:13:31 [emerg] 24628#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2026/06/29 14:13:31 [emerg] 24628#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2026/06/29 14:13:52 [info] 24598#0: *1 [lua] logger.lua:4: info(): [WAF] Request received | {"ip":"127.0.0.1","uri":"\/","method":"GET"}, client: 127.0.0.1, server: , request: "GET / HTTP/1.1", host: "localhost:8080"
+2026/06/29 14:13:52 [info] 24598#0: *1 [lua] logger.lua:4: info(): [WAF] Request allowed | {"score":0,"ip":"127.0.0.1"}, client: 127.0.0.1, server: , request: "GET / HTTP/1.1", host: "localhost:8080"
+2026/06/29 14:13:53 [error] 24598#0: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://127.0.0.1:3000/", host: "localhost:8080"
+2026/06/29 14:13:53 [info] 24598#0: *1 client 127.0.0.1 closed keepalive connection
+2026/06/29 14:15:34 [info] 24599#0: *3 [lua] logger.lua:4: info(): [WAF] Request received | {"ip":"127.0.0.1","uri":"\/","method":"GET"}, client: 127.0.0.1, server: , request: "GET / HTTP/1.1", host: "localhost:8080"
+2026/06/29 14:15:34 [info] 24599#0: *3 [lua] logger.lua:4: info(): [WAF] Request allowed | {"score":0,"ip":"127.0.0.1"}, client: 127.0.0.1, server: , request: "GET / HTTP/1.1", host: "localhost:8080"
+2026/06/29 14:15:34 [info] 24599#0: *3 client 127.0.0.1 closed keepalive connection
+2026/06/29 14:15:43 [info] 24600#0: *5 [lua] logger.lua:4: info(): [WAF] Request received | {"ip":"127.0.0.1","uri":"\/login","method":"POST"}, client: 127.0.0.1, server: , request: "POST /login HTTP/1.1", host: "localhost:8080"
+2026/06/29 14:15:43 [warn] 24600#0: *5 [lua] logger.lua:8: warn(): [WAF] SQLi pattern detected | {"pattern":"or 1=1","uri":"\/login"}, client: 127.0.0.1, server: , request: "POST /login HTTP/1.1", host: "localhost:8080"
+2026/06/29 14:15:43 [warn] 24600#0: *5 [lua] logger.lua:8: warn(): [WAF] Request blocked | {"reasons":["sqli:or 1=1"],"ip":"127.0.0.1","score":4}, client: 127.0.0.1, server: , request: "POST /login HTTP/1.1", host: "localhost:8080"
+2026/06/29 14:15:43 [info] 24600#0: *5 client 127.0.0.1 closed keepalive connection
+2026/06/29 14:16:57 [notice] 25091#0: ModSecurity-nginx v1.0.4 (rules loaded inline/local/remote: 0/823/0)
+2026/06/29 14:16:57 [notice] 25091#0: libmodsecurity3 version 3.0.14
+2026/06/29 14:16:57 [notice] 25091#0: signal process started
+2026/06/29 14:16:59 [notice] 25105#0: ModSecurity-nginx v1.0.4 (rules loaded inline/local/remote: 0/823/0)
+2026/06/29 14:16:59 [notice] 25105#0: libmodsecurity3 version 3.0.14
+2026/06/29 14:17:02 [notice] 25140#0: ModSecurity-nginx v1.0.4 (rules loaded inline/local/remote: 0/823/0)
+2026/06/29 14:17:02 [notice] 25140#0: libmodsecurity3 version 3.0.14
+2026/06/29 14:17:02 [notice] 25140#0: signal process started
+2026/06/29 14:17:05 [notice] 25154#0: ModSecurity-nginx v1.0.4 (rules loaded inline/local/remote: 0/823/0)
+2026/06/29 14:17:05 [notice] 25154#0: libmodsecurity3 version 3.0.14
+2026/06/29 14:17:09 [notice] 25168#0: ModSecurity-nginx v1.0.4 (rules loaded inline/local/remote: 0/823/0)
+2026/06/29 14:17:09 [notice] 25168#0: libmodsecurity3 version 3.0.14
+2026/06/29 14:17:14 [info] 25170#0: *1 ModSecurity: Warning. detected SQLi using libinjection. [file "modsec/owasp-crs/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf"] [line "46"] [id "942100"] [rev ""] [msg "SQL Injection Attack Detected via libinjection"] [data "Matched Data: s&sos found within ARGS:username: admin' OR '1'='1"] [severity "2"] [ver "OWASP_CRS/4.22.0-dev"] [maturity "0"] [accuracy "0"] [tag "application-multi"] [tag "language-multi"] [tag "platform-multi"] [tag "attack-sqli"] [tag "paranoia-level/1"] [tag "OWASP_CRS"] [tag "OWASP_CRS/ATTACK-SQLI"] [tag "capec/1000/152/248/66"] [hostname "localhost"] [uri "/login"] [unique_id "178273003481.688166"] [ref "v155,16"], client: 127.0.0.1, server: , request: "POST /login HTTP/1.1", host: "localhost:8080"
+2026/06/29 14:17:14 [error] 25170#0: *1 [client 127.0.0.1] ModSecurity: Access denied with code 403 (phase 2). Matched "Operator `Ge' with parameter `5' against variable `TX:BLOCKING_INBOUND_ANOMALY_SCORE' (Value: `5' ) [file "modsec/owasp-crs/rules/REQUEST-949-BLOCKING-EVALUATION.conf"] [line "222"] [id "949110"] [rev ""] [msg "Inbound Anomaly Score Exceeded (Total Score: 5)"] [data ""] [severity "0"] [ver "OWASP_CRS/4.22.0-dev"] [maturity "0"] [accuracy "0"] [tag "anomaly-evaluation"] [tag "OWASP_CRS"] [hostname "localhost"] [uri "/login"] [unique_id "178273003481.688166"] [ref ""], client: 127.0.0.1, server: , request: "POST /login HTTP/1.1", host: "localhost:8080"
+2026/06/29 14:17:14 [info] 25170#0: *1 client 127.0.0.1 closed keepalive connection
+2026/06/29 14:33:03 [notice] 25457#0: ModSecurity-nginx v1.0.4 (rules loaded inline/local/remote: 0/823/0)
+2026/06/29 14:33:03 [notice] 25457#0: libmodsecurity3 version 3.0.14
+2026/06/29 14:33:03 [notice] 25457#0: signal process started
