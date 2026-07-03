@@ -4,6 +4,11 @@ local logger      = require("feature_extraction.logger")
 local extractors = {
     require("feature_extraction.features.metadata"),
     require("feature_extraction.features.http_method"),
+    require("feature_extraction.features.header.header_fingerprint"),
+    require("feature_extraction.features.header.header_lengths"),
+    require("feature_extraction.features.header.header_presence"),
+    require("feature_extraction.features.header.header_statistics"),
+
 }
 
 local M = {}
