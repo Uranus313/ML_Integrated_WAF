@@ -1,6 +1,6 @@
 local _M = {}
-local scoring = require("scoring")
-local logger = require("utils.logger")  -- your logger module
+local scoring = require("detection.scoring")
+local logger = require("detection.utils.logger")  -- your logger module
 
 -- Lowercase, trim, collapse spaces
 function _M.basic(str)

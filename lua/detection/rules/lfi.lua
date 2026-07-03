@@ -1,6 +1,6 @@
-local normalize = require("utils.normalize")
-local logger = require("utils.logger")
-local scoring = require("scoring")
+local normalize = require("detection.utils.normalize")
+local logger = require("detection.utils.logger")
+local scoring = require("detection.scoring")
 
 local _M = {}
 

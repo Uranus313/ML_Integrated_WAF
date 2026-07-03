@@ -1,8 +1,8 @@
 -- Main WAF entry (modular)
-local scoring = require("scoring")
-local logger  = require("utils.logger")
-local crs = require("conf.crs")
-local normalize = require("utils.normalize")
+local scoring = require("detection.scoring")
+local logger  = require("detection.utils.logger")
+local crs = require("detection.conf.crs")
+local normalize = require("detection.utils.normalize")
 local cjson = require("cjson.safe")
 -- Load all rule modules
 -- local rules = {
@@ -15,13 +15,13 @@ local cjson = require("cjson.safe")
 local rules = {}
 
 if crs.enabled_categories.xss then
-    table.insert(rules, require("rules.xss"))
+    table.insert(rules, require("detection.rules.xss"))
 end
 if crs.enabled_categories.sqli then
-    table.insert(rules, require("rules.sqli"))
+    table.insert(rules, require("detection.rules.sqli"))
 end
 if crs.enabled_categories.lfi then
-    table.insert(rules, require("rules.lfi"))
+    table.insert(rules, require("detection.rules.lfi"))
 end
 
 
