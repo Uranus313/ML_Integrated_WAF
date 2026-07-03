@@ -23,7 +23,14 @@ function M.read()
     local body = ngx.req.get_body_data() or ""
 
     local headers = ngx.req.get_headers()
-
+    local payload = table.concat({
+        ngx.var.request_uri or "",
+        body or "",
+        headers["cookie"] or "",
+        headers["user-agent"] or "",
+        headers["referer"] or "",
+        headers["authorization"] or "",
+    }, " ")
     return {
 
         request_id = ngx.var.request_id,
@@ -52,7 +59,8 @@ function M.read()
 
             cookies = flatten_cookies(headers["cookie"]),
 
-            http_version = ngx.req.http_version()
+            http_version = ngx.req.http_version(),
+            payload = payload
 
         },
 

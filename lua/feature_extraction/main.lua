@@ -8,6 +8,12 @@ local extractors = {
     require("feature_extraction.features.header.header_lengths"),
     require("feature_extraction.features.header.header_presence"),
     require("feature_extraction.features.header.header_statistics"),
+    require("lua.feature_extraction.features.query"),
+    require("lua.feature_extraction.features.url"),
+    require("lua.feature_extraction.features.user_agent"),
+    require("lua.feature_extraction.features.cookie"),
+    require("lua.feature_extraction.features.character_statistics"),
+    require("lua.feature_extraction.features.body")
 
 }
 

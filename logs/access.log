@@ -133,3 +133,8 @@
 { "ip":"127.0.0.1", "method":"GET", "uri":"/?id=1%20UNION%20SELECT%201,2,3", "status":500 }
 { "ip":"127.0.0.1", "method":"GET", "uri":"/?id=1%20UNION%20SELECT%201,2,3", "status":403 }
 { "ip":"127.0.0.1", "method":"GET", "uri":"/?id=1%20UNION%20SELECT%201,2,3", "status":403 }
+{ "ip":"127.0.0.1", "method":"GET", "uri":"/?id=1%20UNION%20SELECT%201,2,3", "status":403 }
+{ "ip":"127.0.0.1", "method":"GET", "uri":"/?id=1%20UNION%20SELECT%201,2,3", "status":403 }
+{ "ip":"127.0.0.1", "method":"GET", "uri":"/?id=1%20UNION%20SELECT%201,2,3", "status":403 }
+{ "ip":"127.0.0.1", "method":"POST", "uri":"/api/login.php?id=1%20UNION%20SELECT%201,2,3&search=%3Cscript%3Ealert(1)%3C/script%3E&page=10&empty=&dup=test&dup=test&hex=0x41414141&b64=Y2F0IC9ldGMvcGFzc3dk", "status":403 }
+{ "ip":"127.0.0.1", "method":"GET", "uri":"/?id=1%20UNION%20SELECT%201,2,3", "status":403 }
