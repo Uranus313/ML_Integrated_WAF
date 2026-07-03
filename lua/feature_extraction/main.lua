@@ -13,7 +13,15 @@ local extractors = {
     require("lua.feature_extraction.features.user_agent"),
     require("lua.feature_extraction.features.cookie"),
     require("lua.feature_extraction.features.character_statistics"),
-    require("lua.feature_extraction.features.body")
+    require("lua.feature_extraction.features.body"),
+    require("lua.feature_extraction.features.xss_lexical"),
+    require("lua.feature_extraction.features.sql_lexical"),
+    require("lua.feature_extraction.features.path_traversal"),
+    require("lua.feature_extraction.features.http_anomalies"),
+    require("lua.feature_extraction.features.file_upload"),
+    require("lua.feature_extraction.features.encoding"),
+    require("lua.feature_extraction.features.delimiter_statistics"),
+    require("lua.feature_extraction.features.command_injection")
 
 }
 
