@@ -168,7 +168,7 @@ function M.extract(tx)
     f.contains_encoded_chars =
         uri:find("%%", 1, true) and 1 or 0
 
-    f.contains_directory_traversal =
+    f.path_contains_directory_traversal =
         path:find("..", 1, true) and 1 or 0
 
     f.contains_null_byte =

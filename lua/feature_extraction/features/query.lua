@@ -85,6 +85,9 @@ function M.extract(tx)
 
             special_character_count =
                 special_character_count + specials
+            
+            f.query_contains_directory_traversal =
+                v:find("..", 1, true) and 1 or 0    
         end
     end
 

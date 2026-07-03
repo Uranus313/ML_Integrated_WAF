@@ -176,6 +176,9 @@ function M.extract(tx)
     f.body_contains_null_byte =
         (body:find("%z", 1, true) or body:find("%%00", 1, true))
         and 1 or 0
+    
+    f.body_contains_directory_traversal =
+        body:find("..", 1, true) and 1 or 0    
 
 end
 
