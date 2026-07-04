@@ -26,7 +26,7 @@ function _M.check(req, state)
 
     for _, pat in ipairs(patterns) do
         if payload:find(pat, 1, true) then
-            logger.warn("SQLi pattern detected", { request_id = ngx.var.request_id, pattern = pat, uri = req.uri })
+            -- logger.warn("SQLi pattern detected", { request_id = ngx.var.request_id, pattern = pat, uri = req.uri })
             scoring.add(state, 4, "sqli:" .. pat)
         end
     end

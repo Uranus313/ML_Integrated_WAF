@@ -31,7 +31,7 @@ local function multi_decode_with_score(str, state)
         -- suspicious: more than 2 layers
         if i >= 3 and state then
             scoring.add(state, 1, "multi-encoding detected")
-            logger.warn("Multi-encoding detected", { request_id = ngx.var.request_id, layers = i, score = state.score })
+            -- logger.warn("Multi-encoding detected", { request_id = ngx.var.request_id, layers = i, score = state.score })
         end
     end
 

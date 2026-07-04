@@ -102,7 +102,7 @@ req.payload = table.concat({
 local state = scoring.new()
 -- logger.warn(req.payload)
 -- Log the incoming request
-logger.info("Request received", { ip = req.ip, request_id = ngx.var.request_id, method = req.method, uri = req.uri  })
+-- logger.info("Request received", { ip = req.ip, request_id = ngx.var.request_id, method = req.method, uri = req.uri  })
 req.payload = normalize.prepare(req.payload, state)
 
 -- Run all rules
