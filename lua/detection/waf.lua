@@ -102,7 +102,7 @@ req.payload = table.concat({
 local state = scoring.new()
 -- logger.warn(req.payload)
 -- Log the incoming request
-logger.info("Request received", { ip = req.ip, method = req.method, uri = req.uri })
+logger.info("Request received", { ip = req.ip, request_id = ngx.var.request_id, method = req.method, uri = req.uri  })
 req.payload = normalize.prepare(req.payload, state)
 
 -- Run all rules
@@ -112,7 +112,7 @@ end
 
 -- If score exceeds threshold, block
 if scoring.should_block(state, crs.anomaly_threshold) then
-    logger.warn("Request blocked", { ip = req.ip, score = state.score, reasons = state.reasons })
+    logger.warn("Request blocked", { ip = req.ip , request_id = ngx.var.request_id, score = state.score, reasons = state.reasons })
     ngx.status = ngx.HTTP_FORBIDDEN
     ngx.header["Content-Type"] = "text/plain"
     ngx.say("Forbidden")
@@ -120,5 +120,5 @@ if scoring.should_block(state, crs.anomaly_threshold) then
 end
 
 -- Request allowed
-logger.info("Request allowed", { ip = req.ip, score = state.score })
+logger.info("Request allowed", { ip = req.ip, request_id = ngx.var.request_id, score = state.score })
 return

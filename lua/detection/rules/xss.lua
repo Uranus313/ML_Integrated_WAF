@@ -18,7 +18,7 @@ function _M.check(req, state)
 
     for _, pat in ipairs(patterns) do
         if payload:find(pat, 1, true) then
-            logger.warn("XSS pattern detected", { pattern = pat, uri = req.uri })
+            logger.warn("XSS pattern detected", { request_id = ngx.var.request_id, pattern = pat, uri = req.uri })
             scoring.add(state, 3, "xss:" .. pat)
         end
     end

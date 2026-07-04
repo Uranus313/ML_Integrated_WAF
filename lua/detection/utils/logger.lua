@@ -1,15 +1,45 @@
-local _M = {}
+local cjson = require("cjson.safe")
 
-function _M.info(msg, data)
-    ngx.log(ngx.INFO, "[WAF] ", msg, data and (" | " .. require("cjson").encode(data) or ""))
+local M = {}
+
+local LOG_FILE = "logs/waf.jsonl"
+
+local function write(level, msg, data)
+
+    local f = io.open(LOG_FILE, "a")
+    if not f then
+        return false
+    end
+
+    local entry = {
+        timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
+        level = level,
+        message = msg,
+        data = data
+    }
+
+    f:write(cjson.encode(entry), "\n")
+    f:close()
+
+    return true
 end
 
-function _M.warn(msg, data)
-    ngx.log(ngx.WARN, "[WAF] ", msg, data and (" | " .. require("cjson").encode(data) or ""))
+function M.info(msg, data)
+    return write("INFO", msg, data)
 end
 
-function _M.error(msg, data)
-    ngx.log(ngx.ERR, "[WAF] ", msg, data and (" | " .. require("cjson").encode(data) or ""))
+function M.warn(msg, data)
+    return write("WARN", msg, data)
 end
 
-return _M
+function M.error(msg, data)
+    return write("ERROR", msg, data)
+end
+
+function M.write_async(level, msg, data)
+    ngx.timer.at(0, function()
+        M.write(level, msg, data)
+    end)
+end
+
+return M
