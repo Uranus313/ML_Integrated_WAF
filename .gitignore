@@ -1,2 +1,6 @@
 node_modules
 logs
+datasets/*
+!datasets/.gitkeep
+dataset_builder/requests/*
+!dataset_builder/requests/.gitkeep
