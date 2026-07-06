@@ -1,11 +1,9 @@
 local cjson = require("cjson.safe")
+local resty_lock = require("resty.lock")
 
 local M = {}
 
--- IMPORTANT: JSONL format (1 JSON per line)
-function M.write(tx)
-
-    local file_path = "logs/transactions.jsonl"
+local function write(tx)
 
     local json = cjson.encode(tx)
 
@@ -14,20 +12,47 @@ function M.write(tx)
         return
     end
 
-    local file, err = io.open(file_path, "a")
+    -- Acquire lock
+    local lock, err = resty_lock:new("feature_extraction_log_locks", {
+        timeout = 5,
+        exptime = 10,
+    })
 
-    if not file then
-        ngx.log(ngx.ERR, "[LOGGER] Cannot open log file: ", err)
+    if not lock then
+        ngx.log(ngx.ERR, "[LOGGER] Failed to create feature extraction lock: ", err)
         return
     end
 
-    file:write(json, "\n")
+    local elapsed, err = lock:lock("transactions")
+
+    if not elapsed then
+        ngx.log(ngx.ERR, "[LOGGER] Failed to acquire feature extraction lock: ", err)
+        return
+    end
+
+    -- Critical section
+    local file, err = io.open("logs/transactions.jsonl", "a")
+
+    if not file then
+        lock:unlock()
+        ngx.log(ngx.ERR, "[LOGGER] Cannot open feature extraction log file: ", err)
+        return
+    end
+
+    file:write(json)
+    file:write("\n")
     file:close()
+
+    local ok, err = lock:unlock()
+
+    if not ok then
+        ngx.log(ngx.ERR, "[LOGGER] Failed to release feature extraction lock: ", err)
+    end
 end
 
 function M.write_async(tx)
     ngx.timer.at(0, function()
-        M.write(tx)
+        write(tx)
     end)
 end
 
