@@ -11,3 +11,4 @@ ai/onnx/*
 
 ai/treelite/*
 !ai/treelite/.gitkeep
+__pycache__
