@@ -6,3 +6,8 @@ dataset_builder/requests/*
 !dataset_builder/requests/.gitkeep
 dataset_builder/final_dataset/*
 !dataset_builder/final_dataset/.gitkeep
+ai/onnx/*
+!ai/onnx/.gitkeep
+
+ai/treelite/*
+!ai/treelite/.gitkeep

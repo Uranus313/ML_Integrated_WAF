@@ -8,7 +8,14 @@ from sklearn.metrics import roc_auc_score
 from sklearn.metrics import average_precision_score
 
 
-df = pd.read_csv("../dataset_builder/final_dataset/dataset.csv")
+from skl2onnx import to_onnx
+from skl2onnx.common.data_types import FloatTensorType
+import onnx
+import json
+
+
+
+df = pd.read_csv("../../dataset_builder/final_dataset/dataset.csv")
 
 df = df.fillna(0)
 
@@ -49,6 +56,8 @@ model = RandomForestClassifier(
 print(X_train.select_dtypes(include="object").columns)
 model.fit(X_train, y_train)
 
+
+
 pred = model.predict(X_test)
 
 probs = model.predict_proba(X_test)[:,1]
@@ -58,3 +67,29 @@ print("PR-AUC :", average_precision_score(y_test, probs))
 
 print(classification_report(y_test, pred))
 print(confusion_matrix(y_test, pred))
+
+
+
+# Export model to ONNX
+initial_type = [
+    ("float_input", FloatTensorType([None, X_train.shape[1]]))
+]
+
+onnx_model = to_onnx(
+    model,
+    initial_types=initial_type,
+    target_opset=17
+)
+
+with open("../onnx/random_forest.onnx", "wb") as f:
+    f.write(onnx_model.SerializeToString())
+
+print("Saved model to random_forest.onnx")
+
+
+
+
+with open("../onnx/feature_columns.json", "w") as f:
+    json.dump(list(X.columns), f, indent=2)
+
+print("Saved feature_columns.json")
