@@ -1,0 +1,60 @@
+import pandas as pd
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import average_precision_score
+
+
+df = pd.read_csv("../dataset_builder/final_dataset/dataset.csv")
+
+df = df.fillna(0)
+
+X = df.drop(columns=[
+    "label",
+    "request_id",
+    "req_number",
+    "header_fingerprint"
+])
+
+X = pd.get_dummies(
+    X,
+    columns=["request_method", "extension"],
+    dtype=int
+)
+
+y = df["label"]
+
+split = int(len(df) * 0.8)
+print(X.dtypes[X.dtypes == "object"])
+X_train = X.iloc[:split]
+X_test  = X.iloc[split:]
+
+y_train = y.iloc[:split]
+y_test  = y.iloc[split:]
+print(df["label"].value_counts())
+print("Train:")
+print(y_train.value_counts())
+
+print("\nTest:")
+print(y_test.value_counts())
+model = RandomForestClassifier(
+    n_estimators=300,
+    class_weight="balanced",
+    n_jobs=-1,
+    random_state=42
+)
+print(X_train.select_dtypes(include="object").columns)
+model.fit(X_train, y_train)
+
+pred = model.predict(X_test)
+
+probs = model.predict_proba(X_test)[:,1]
+
+print("ROC-AUC:", roc_auc_score(y_test, probs))
+print("PR-AUC :", average_precision_score(y_test, probs))
+
+print(classification_report(y_test, pred))
+print(confusion_matrix(y_test, pred))
