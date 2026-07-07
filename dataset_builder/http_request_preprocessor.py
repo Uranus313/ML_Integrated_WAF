@@ -19,7 +19,8 @@ with open("../datasets/csic2010/csic_database.csv",
 
     for row in reader:
 
-        url = urlparse(row["URL"])
+        raw_url = row["URL"].split()[0]   # remove trailing HTTP/1.1 if present
+        url = urlparse(raw_url)
 
         request = {
             "method": row["Method"],
@@ -35,7 +36,7 @@ with open("../datasets/csic2010/csic_database.csv",
 
             "body": row["content"],
 
-            "label": row["classification"].strip().lower(),
+            "label": 0 if row["classification"].strip().lower() == "0" else 1,
 
             "req_number": counter
         }
@@ -229,9 +230,9 @@ with open("../datasets/HttpParamsDataset/payload_full.csv", newline="", encoding
     for i, row in enumerate(reader):
 
         label = (
-            "normal"
+            0
             if row["label"].strip().lower() in ("norm", "normal", "benign")
-            else "attack"
+            else 1
         )
 
         payload = row["payload"]
@@ -247,9 +248,9 @@ with open("../datasets/HttpParamsDataset/payload_full.csv", newline="", encoding
             "body": "",
             "metadata": {
                 "length": int(row["length"]),
-                "attack_type": row["attack_type"],
-                "label": label
+                "attack_type": row["attack_type"]
             },
+            "label": label,
             "req_number": counter
         }
 
@@ -300,3 +301,71 @@ with open("./requests/final_dataset.json", "w", encoding="utf-8") as f:
     json.dump(all_requests, f, indent=4)
 
 print(f"Final dataset contains {len(all_requests)} requests.")
+
+
+
+
+# import csv
+# from urllib.parse import unquote
+
+# # -----------------------------------
+# # Build ML-ready dataset from requests
+# # -----------------------------------
+
+# def get_extension(path):
+#     if "." not in path:
+#         return ""
+#     return path.rsplit(".", 1)[-1].lower()
+
+
+# rows = []
+
+# for req in all_requests:
+
+#     headers = req.get("headers", {})
+#     query = req.get("query", {})
+#     body = req.get("body", "")
+
+#     cookie = headers.get("Cookie", "")
+
+#     row = {
+
+#         # ---------- Request ----------
+#         "request_method": req["method"],
+#         "path_length": len(req["path"]),
+#         "query_count": len(query),
+#         "header_count": len(headers),
+#         "body_length": len(body),
+#         "cookie_length": len(cookie),
+#         "extension": get_extension(req["path"]),
+
+#         # ---------- Encodings ----------
+#         "url_encoded_count": req["path"].count("%")
+#                              + body.count("%")
+#                              + sum(str(v).count("%") for v in query.values()),
+
+#         # ---------- Characters ----------
+#         "special_char_count":
+#             sum(req["path"].count(c) for c in "<>'\";|&`$")
+#             + sum(body.count(c) for c in "<>'\";|&`$"),
+
+#         "digit_count":
+#             sum(ch.isdigit() for ch in req["path"] + body),
+
+#         # ---------- Request shape ----------
+#         "has_body": int(len(body) > 0),
+#         "has_query": int(len(query) > 0),
+
+#         # ---------- Labels ----------
+#         "req_number": req["req_number"],
+#         "label": req["label"],
+#     }
+
+#     rows.append(row)
+
+# with open("./final_dataset/final_dataset_ml.csv", "w", newline="", encoding="utf-8") as f:
+#     writer = csv.DictWriter(f, fieldnames=rows[0].keys())
+#     writer.writeheader()
+#     writer.writerows(rows)
+
+# print(f"Saved {len(rows)} ML samples.")

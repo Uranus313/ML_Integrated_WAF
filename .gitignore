@@ -4,3 +4,5 @@ datasets/*
 !datasets/.gitkeep
 dataset_builder/requests/*
 !dataset_builder/requests/.gitkeep
+dataset_builder/final_dataset/*
+!dataset_builder/final_dataset/.gitkeep

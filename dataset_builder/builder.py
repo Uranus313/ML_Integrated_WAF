@@ -3,17 +3,35 @@ import re
 
 requests = {}
 
+
+with open("./requests/final_dataset.json") as f:
+    original = json.load(f)
+
+labels = {
+    r["req_number"]: r["label"]
+    for r in original
+}
+
+
 # ---------------------------------------------------
 # Load feature extraction output
 # ---------------------------------------------------
 
 with open("../logs/transactions.jsonl") as f:
+    counter = 0
     for line in f:
+        
         tx = json.loads(line)
-
+        if(counter == 0):
+            print(line)
+            print(tx["raw_request"]["headers"]["x-request-number"])
+            counter +=1
+        # print(counter)    
+        req_number = int(tx["raw_request"]["headers"]["x-request-number"])
         requests[tx["request_id"]] = {
             "features": tx["features"],
-            "label": None,
+            "label": labels[req_number],
+            "req_number": req_number,
             "modsec": {},
             "waf": {}
         }
@@ -116,6 +134,8 @@ with open("../logs/waf.jsonl") as f:
 # print(requests)
 
 
+
+
 # ---------------------------------------------------
 # Flatten everything into one ML feature vector
 # ---------------------------------------------------
@@ -124,7 +144,8 @@ dataset = []
 for request_id, req in requests.items():
 
     row = {
-        "request_id": request_id
+        "request_id": request_id,
+        "req_number": req["req_number"]
     }
 
     # Original extracted features
@@ -143,5 +164,15 @@ for request_id, req in requests.items():
 
     dataset.append(row)
 
-print(dataset)
+
 print(len(dataset[0]))
+
+
+import csv
+
+with open("./final_dataset/dataset.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=dataset[0].keys())
+    writer.writeheader()
+    writer.writerows(dataset)
+
+print(f"Saved {len(dataset)} samples to dataset.csv")

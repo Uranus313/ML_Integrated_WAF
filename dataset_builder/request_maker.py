@@ -9,7 +9,7 @@ with open("./requests/final_dataset.json", encoding="utf-8") as f:
 
 
 # Keep only 80% for training
-dataset = dataset[: int(len(dataset) * 0.0005)]
+dataset = dataset[: int(len(dataset) * 0.8)]
 
 print(f"Sending {len(dataset)} training requests.")
 
