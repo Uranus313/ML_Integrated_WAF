@@ -24,6 +24,9 @@ function M.extract(tx)
     local numeric_parameter_count = 0
     local encoded_parameter_count = 0
 
+
+    local query_contains_directory_traversal = 0
+    
     for name, value in pairs(query) do
 
         parameter_count = parameter_count + 1
@@ -86,11 +89,13 @@ function M.extract(tx)
             special_character_count =
                 special_character_count + specials
             
-            f.query_contains_directory_traversal =
-                v:find("..", 1, true) and 1 or 0    
+            if v:find("..", 1, true) then
+            query_contains_directory_traversal = 1
+            end 
         end
     end
 
+    f.query_contains_directory_traversal = query_contains_directory_traversal
     f.parameter_count = parameter_count
 
     if parameter_count > 0 then
