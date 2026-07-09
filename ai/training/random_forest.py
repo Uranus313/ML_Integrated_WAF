@@ -26,11 +26,11 @@ X = df.drop(columns=[
     "header_fingerprint"
 ])
 
-X = pd.get_dummies(
-    X,
-    columns=["request_method", "extension"],
-    dtype=int
-)
+# X = pd.get_dummies(
+#     X,
+#     columns=["request_method", "extension"],
+#     dtype=int
+# )
 
 y = df["label"]
 

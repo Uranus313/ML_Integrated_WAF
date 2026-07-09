@@ -30,11 +30,11 @@ X = df.drop(columns=[
     "header_fingerprint"
 ])
 
-X = pd.get_dummies(
-    X,
-    columns=["request_method", "extension"],
-    dtype=int
-)
+# X = pd.get_dummies(
+#     X,
+#     columns=["request_method", "extension"],
+#     dtype=int
+# )
 
 y = df["label"]
 
@@ -106,7 +106,8 @@ initial_type = [
 
 onnx_model = onnxmltools.convert_lightgbm(
     model,
-    initial_types=initial_type
+    initial_types=initial_type,
+    zipmap=False
 )
 
 with open("../onnx/lightgbm.onnx", "wb") as f:
@@ -114,7 +115,52 @@ with open("../onnx/lightgbm.onnx", "wb") as f:
 
 print("Saved ONNX model")
 
-with open("../onnx/feature_columns.json", "w") as f:
-    json.dump(list(X.columns), f, indent=2)
 
-print("Saved feature_columns.json")
+feature_schema = []
+
+for column in X.columns:
+
+    if column.startswith("request_method_"):
+        feature_schema.append({
+            "name": column,
+            "type": "onehot",
+            "source": "request_method",
+            "value": column[len("request_method_"):]
+        })
+
+    elif column.startswith("extension_"):
+        feature_schema.append({
+            "name": column,
+            "type": "onehot",
+            "source": "extension",
+            "value": column[len("extension_"):]
+        })
+
+    else:
+        feature_schema.append({
+            "name": column,
+            "type": "numeric"
+        })
+
+with open("../onnx/feature_schema.json", "w") as f:
+    json.dump(feature_schema, f, indent=2)
+
+with open("../treelite/feature_schema.json", "w") as f:
+    json.dump(feature_schema, f, indent=2)
+
+print("Saved feature_schema.json")
+
+
+metadata = {
+    "algorithm": "LightGBM",
+    "feature_count": len(X.columns),
+    "positive_class": 1,
+    "negative_class": 0,
+    "threshold": 0.5
+}
+
+with open("../onnx/model_metadata.json", "w") as f:
+    json.dump(metadata, f, indent=2)
+
+with open("../treelite/model_metadata.json", "w") as f:
+    json.dump(metadata, f, indent=2)

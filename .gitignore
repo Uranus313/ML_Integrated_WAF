@@ -12,3 +12,4 @@ ai/onnx/*
 ai/treelite/*
 !ai/treelite/.gitkeep
 __pycache__
+ai/rust/target

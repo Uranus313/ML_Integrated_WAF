@@ -166,8 +166,43 @@ for request_id, req in requests.items():
 
 
 print(len(dataset[0]))
+print(dataset[0])
 
 
+CATEGORICAL_COLUMNS = [
+    "request_method",
+    "extension",
+]
+
+
+categorical_values = {}
+
+for column in CATEGORICAL_COLUMNS:
+    categorical_values[column] = sorted({
+        row.get(column, "")
+        for row in dataset
+        if row.get(column, "") != ""
+    })
+
+processed = []
+
+for row in dataset:
+    row = row.copy()
+
+    for column in CATEGORICAL_COLUMNS:
+        value = row.pop(column, "")
+
+        for possible in categorical_values[column]:
+            row[f"{column}_{possible}"] = int(value == possible)
+
+    processed.append(row)
+
+dataset = processed
+
+for i, row in enumerate(dataset):
+    if "query_contains_directory_traversal" not in row:
+        print(i)
+        break
 import csv
 
 with open("./final_dataset/dataset.csv", "w", newline="", encoding="utf-8") as f:
