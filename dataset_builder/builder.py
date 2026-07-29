@@ -41,6 +41,7 @@ with open("../logs/transactions.jsonl") as f:
 # ---------------------------------------------------
 
 with open("../logs/modsec_audit.log") as f:
+    
     for line in f:
         if not line.strip():
             continue
@@ -57,6 +58,12 @@ with open("../logs/modsec_audit.log") as f:
             continue
 
         messages = transaction.get("messages", [])
+        blocked = any(
+            m["details"]["ruleId"] == "949110"
+            for m in messages
+        )
+
+
 
         anomaly_score = 0
 
@@ -78,8 +85,8 @@ with open("../logs/modsec_audit.log") as f:
         ]
 
         requests[request_id]["modsec"] = {
-            "http_code": transaction["response"]["http_code"],
-
+            # "http_code": transaction["response"]["http_code"],
+            "decision": int(blocked),
             "rule_count": len(messages),
             "unique_rule_count": len(set(rule_ids)),
             "anomaly_score": anomaly_score,
@@ -168,21 +175,76 @@ for request_id, req in requests.items():
 print(len(dataset[0]))
 print(dataset[0])
 
-
 CATEGORICAL_COLUMNS = [
     "request_method",
     "extension",
 ]
 
 
-categorical_values = {}
+# categorical_values = {}
 
-for column in CATEGORICAL_COLUMNS:
-    categorical_values[column] = sorted({
-        row.get(column, "")
-        for row in dataset
-        if row.get(column, "") != ""
-    })
+# for column in CATEGORICAL_COLUMNS:
+#     categorical_values[column] = sorted({
+#         row.get(column, "")
+#         for row in dataset
+#         if row.get(column, "") != ""
+#     })
+
+categorical_values = {
+    "request_method": [
+        "GET",
+        "POST",
+        "PUT",
+    ],
+    "extension": [
+        "1",
+        "asmx",
+        "asp",
+        "aspx",
+        "bak",
+        "bat",
+        "bin",
+        "box",
+        "btr",
+        "cfm",
+        "cgi",
+        "cnf",
+        "com",
+        "css",
+        "dll",
+        "do",
+        "exe",
+        "ext",
+        "gif",
+        "htm",
+        "html",
+        "htr",
+        "inc",
+        "ini",
+        "java",
+        "jpeg",
+        "jpg",
+        "js",
+        "jsp",
+        "mdb",
+        "msf",
+        "mspx",
+        "nsf",
+        "old",
+        "php",
+        "php3",
+        "php4",
+        "pl",
+        "png",
+        "portal",
+        "properties",
+        "sh",
+        "shtml",
+        "swf",
+        "tiff",
+        "xml",
+    ],
+}
 
 processed = []
 
@@ -198,6 +260,8 @@ for row in dataset:
     processed.append(row)
 
 dataset = processed
+print(dataset[0])
+print(len(dataset[0].keys()))
 
 for i, row in enumerate(dataset):
     if "query_contains_directory_traversal" not in row:
@@ -205,7 +269,7 @@ for i, row in enumerate(dataset):
         break
 import csv
 
-with open("./final_dataset/dataset.csv", "w", newline="", encoding="utf-8") as f:
+with open("./final_dataset/test_dataset.csv", "w", newline="", encoding="utf-8") as f:
     writer = csv.DictWriter(f, fieldnames=dataset[0].keys())
     writer.writeheader()
     writer.writerows(dataset)

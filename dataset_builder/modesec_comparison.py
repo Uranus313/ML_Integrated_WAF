@@ -1,24 +1,25 @@
 import csv
 import json
-
 from collections import Counter
 
-codes = Counter()
+# ----------------------------
+# Count ModSecurity decisions
+# ----------------------------
 
-with open("dataset.csv") as f:
+decisions = Counter()
+
+with open("./final_dataset/dataset.csv", encoding="utf-8") as f:
     reader = csv.DictReader(f)
     for row in reader:
-        codes[row["mod_security_http_code"]] += 1
+        decisions[int(row["mod_security_decision"])] += 1
 
-print(codes)
-
+print("ModSecurity decisions:")
+print(decisions)
 
 
 # ----------------------------
 # Ground truth labels
 # ----------------------------
-
-
 
 with open("./requests/final_dataset.json", encoding="utf-8") as f:
     requests = json.load(f)
@@ -28,13 +29,14 @@ ground_truth = {
     for r in requests
 }
 
+
 # ----------------------------
 # Benchmark
 # ----------------------------
 
 TP = FP = TN = FN = 0
 
-with open("./dataset.csv", encoding="utf-8") as f:
+with open("./final_dataset/dataset.csv", encoding="utf-8") as f:
     reader = csv.DictReader(f)
 
     for row in reader:
@@ -46,10 +48,8 @@ with open("./dataset.csv", encoding="utf-8") as f:
 
         actual = ground_truth[req_number]
 
-        status = int(row["mod_security_http_code"])
-
         # ModSecurity prediction
-        predicted = 1 if status == 403 else 0
+        predicted = int(row["mod_security_decision"])
 
         if predicted == 1 and actual == 1:
             TP += 1
@@ -59,6 +59,7 @@ with open("./dataset.csv", encoding="utf-8") as f:
             TN += 1
         else:
             FN += 1
+
 
 # ----------------------------
 # Metrics
@@ -75,7 +76,7 @@ f1 = (
     else 0
 )
 
-print("Confusion Matrix")
+print("\nConfusion Matrix")
 print("----------------")
 print(f"TP: {TP}")
 print(f"FP: {FP}")

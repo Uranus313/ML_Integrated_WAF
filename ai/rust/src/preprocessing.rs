@@ -1,124 +1,256 @@
 use std::{
-    collections::{HashMap, HashSet},
-    fs::File,
-    io::{BufRead, BufReader},
+    collections::{HashMap, HashSet}
 };
 use anyhow::{anyhow, Result,Context};
 use serde_json::{json, Map, Value};
+use std::fs::File;
+use crate::PredictionRequest;
 
-const REQUEST_ID: &str = "2cbd1589929fe8617b45a44d64aba202";
+pub fn build_features(
+    request: PredictionRequest,
+    expected: &[String]
+) -> Result<Vec<f32>> {
+    // ------------------------------
+    // Transaction features
+    // ------------------------------
 
-pub fn preprocess_request() -> Result<()>{
-    let mut row = find_transaction(REQUEST_ID)?
-    .ok_or_else(|| anyhow!("Transaction not found"))?;
+    let mut row = find_transaction(&request.transaction)?
+        .ok_or_else(|| anyhow!("Invalid transaction"))?;
 
-    let modsec = find_modsec(REQUEST_ID)?;
+
+        println!("{:?}", row.get("extension"));
+        println!("{:?}", row.get("extension_length"));
+    // ------------------------------
+    // ModSecurity features
+    // ------------------------------
+
+    let modsec = find_modsec(&request.modsec)?;
     for (k, v) in modsec {
         row.insert(format!("mod_security_{}", k), v);
     }
 
-    let waf = find_waf(REQUEST_ID)?;
+    // ------------------------------
+    // Lua WAF features
+    // ------------------------------
+
+    let waf = find_waf(&request.lua)?;
     for (k, v) in waf {
         row.insert(format!("lua_detection_{}", k), v);
     }
 
     // ------------------------------
-    // Read CSV header
+    // Read feature order
     // ------------------------------
 
-    let mut rdr = csv::Reader::from_path("../../dataset_builder/final_dataset/dataset.csv").context("Failed to open ../logs/dataset.csv")?;
-    let headers = rdr.headers()?.clone();
+    // let feature_columns: Vec<String> =
+    //     serde_json::from_reader(
+    //         File::open("./models/feature_columns.json")?
+    //     )?;
 
+    let feature_columns = expected;
     // ------------------------------
     // One-hot encode
     // ------------------------------
 
     let categorical = ["request_method", "extension"];
-
     for column in categorical {
         let value = row
             .remove(column)
-            .and_then(|v| v.as_str().map(|s| s.to_string()))
+            .and_then(|v| v.as_str().map(str::to_owned))
             .unwrap_or_default();
 
-        let prefix = format!("{}_", column);
+        let prefix = format!("{column}_");
 
-        for h in headers.iter() {
-            if h.starts_with(&prefix) {
-                let category = &h[prefix.len()..];
-                row.insert(h.to_string(), json!(value == category));
+        for feature in feature_columns {
+             if feature == "extension_length" {
+        continue;
+    }
+            if let Some(category) = feature.strip_prefix(&prefix) {
+                println!(
+    "INSERT {} = {}",
+    feature,
+    value == category
+);
+                row.insert(
+                    feature.clone(),
+                    json!(value == category),
+                );
             }
         }
     }
 
     // ------------------------------
-    // Build final feature vector
+    // Build feature vector
     // ------------------------------
 
-    let ignore = ["request_id", "req_number", "label"];
+    let ignore = [
+        "request_id",
+        "req_number",
+        "label",
+        "header_fingerprint",
+    ];
 
-    let mut feature_row = Map::new();
+    let mut features = Vec::with_capacity(feature_columns.len());
+    let mut feature_names = Vec::with_capacity(feature_columns.len());
 
-    for h in headers.iter() {
-        if ignore.contains(&h) {
+    
+
+    for feature_name in feature_columns {
+
+        if ignore.contains(&feature_name.as_str()) {
+            continue;
+        }
+if feature_name == "extension_length" {
+    println!("Before remove: {:?}", row.get("extension_length"));
+}
+        let value = row.remove(feature_name).unwrap_or(json!(0));
+
+        let feature = match value {
+            Value::Bool(b) => {
+                if b { 1.0 } else { 0.0 }
+            }
+
+            Value::Number(n) => {
+                n.as_f64().unwrap_or(0.0) as f32
+            }
+
+            Value::String(ref s) => {
+                s.parse::<f32>().unwrap_or(0.0)
+            }
+
+            _ => 0.0,
+        };
+
+        feature_names.push(feature_name.clone());
+        features.push(feature);
+    }
+
+//     if let Some(idx) = feature_columns
+//     .iter()
+//     .position(|f| f == "extension_length")
+// {
+//     features[idx] = 3.0;
+// }
+    if feature_names != expected {
+        println!("Feature order mismatch!");
+
+        for (i, (built, exp)) in feature_names.iter().zip(expected.iter()).enumerate() {
+            if built != exp {
+                println!("{:3}: built='{}' expected='{}'", i, built, exp);
+            }
+        }
+    }
+
+    println!("==============================");
+    println!("Feature dump");
+    println!("==============================");
+
+    // for (name, value) in feature_columns.iter().zip(features.iter()) {
+    //     println!("{:<40} {}", name, value);
+    // }
+    // compare_with_csv(
+    // 113798,
+    // &feature_names,
+    // &features,
+    // )?;
+    Ok(features)
+    }
+
+
+
+fn compare_with_csv(
+    req_number: i32,
+    feature_names: &[String],
+    features: &[f32],
+) -> anyhow::Result<()> {
+    let mut rdr = csv::Reader::from_path(
+        "../../dataset_builder/final_dataset/test_dataset.csv"
+    )?;
+
+    let headers = rdr.headers()?.clone();
+
+    let req_idx = headers
+        .iter()
+        .position(|h| h == "req_number")
+        .unwrap();
+
+    // Find the matching row
+    for record in rdr.records() {
+        let record = record?;
+
+        if record[req_idx].parse::<i32>().unwrap() != req_number {
             continue;
         }
 
-        feature_row.insert(
-            h.to_string(),
-            row.remove(h).unwrap_or(json!(0)),
-        );
+        println!("Comparing request {}\n", req_number);
+
+        let header_map: HashMap<&str, usize> = headers
+            .iter()
+            .enumerate()
+            .map(|(i, h)| (h, i))
+            .collect();
+
+        let mut differences = 0;
+
+        for (name, rust_value) in feature_names.iter().zip(features.iter()) {
+            let Some(idx) = header_map.get(name.as_str()) else {
+                println!("Missing column in CSV: {}", name);
+                continue;
+            };
+
+            let csv_value = record[*idx]
+                .parse::<f32>()
+                .unwrap_or(0.0);
+
+            if (rust_value - csv_value).abs() > 1e-6 {
+                differences += 1;
+
+                println!(
+                    "{:<40} rust={:<12} csv={}",
+                    name,
+                    rust_value,
+                    csv_value
+                );
+            }
+        }
+
+        println!("\nTotal differences: {}", differences);
+
+        return Ok(());
     }
 
-    println!(
-        "{}",
-        serde_json::to_string_pretty(&feature_row)?
-    );
+    println!("Request {} not found in CSV", req_number);
 
     Ok(())
 }
 
-fn find_transaction(
-    request_id: &str,
-) -> Result<Option<HashMap<String, Value>>> {
-    let file = BufReader::new(File::open("../../logs/transactions.jsonl").context("Failed to open ../logs/transactions.jsonl")?);
 
-    for line in file.lines() {
-        let value: Value = serde_json::from_str(&line?)?;
+    fn find_transaction(
+        line: &str,
+    ) -> Result<Option<HashMap<String, Value>>> {
 
-        if value["request_id"] == request_id {
-            let obj = value["features"]
-                .as_object()
-                .unwrap()
-                .clone();
+            let value: Value = serde_json::from_str(line)?;
 
-            return Ok(Some(obj.into_iter().collect()));
-        }
-    }
+                let obj = value["features"]
+                    .as_object()
+                    .unwrap()
+                    .clone();
 
-    Ok(None)
+                return Ok(Some(obj.into_iter().collect()));
+
+        Ok(None)
 }
 
 
 fn find_modsec(
-    request_id: &str,
+    line: &str,
 ) -> Result<HashMap<String, Value>> {
-    let file = BufReader::new(File::open("../../logs/modsec_audit.log").context("Failed to open ../logs/modsec_audit.log")?,);
 
-    for line in file.lines() {
-        let line = line?;
 
-        if line.trim().is_empty() {
-            continue;
-        }
 
-        let audit: Value = serde_json::from_str(&line)?;
+        let audit: Value = serde_json::from_str(line)?;
 
         let headers = &audit["transaction"]["request"]["headers"];
-
-        if headers["X-WAF-Request-ID"].as_str() != Some(request_id) {
-            continue;
-        }
 
         let transaction = &audit["transaction"];
 
@@ -143,8 +275,16 @@ fn find_modsec(
         let mut severity_2 = 0;
         let mut severity_3 = 0;
         let mut severity_4 = 0;
-
+        
+        let mut blocked = false;
+        
         for message in &messages {
+
+
+            if message["details"]["ruleId"].as_str() == Some("949110") {
+                    blocked = true;
+                }
+
             // --------------------------
             // Anomaly score
             // --------------------------
@@ -214,8 +354,8 @@ fn find_modsec(
         let mut out = HashMap::new();
 
         out.insert(
-            "http_code".into(),
-            transaction["response"]["http_code"].clone(),
+            "decision".into(),
+            serde_json::Value::from(if blocked { 1 } else { 0 }),
         );
 
         out.insert("rule_count".into(), json!(messages.len()));
@@ -237,30 +377,23 @@ fn find_modsec(
         out.insert("severity_4".into(), json!(severity_4));
 
         return Ok(out);
-    }
+    
 
-    Ok(HashMap::new())
+    // Ok(HashMap::new())
 }
 
 
 
 
 fn find_waf(
-    request_id: &str,
+    line: &str,
 ) -> Result<HashMap<String, Value>> {
-    let file = BufReader::new(File::open("../../logs/waf.jsonl").context("Failed to open ../logs/waf.jsonl")?);
+    
 
-    for line in file.lines() {
-        let line = line?;
-        if line.trim().is_empty() {
-            continue;
-        }
 
-        let value: Value = serde_json::from_str(&line)?;
+        let value: Value = serde_json::from_str(line)?;
 
-        if value["data"]["request_id"].as_str() != Some(request_id) {
-            continue;
-        }
+        
 
         let reasons = value["data"]["reasons"]
             .as_array()
@@ -322,7 +455,7 @@ fn find_waf(
         out.insert("upload_count".into(), json!(upload_count));
 
         return Ok(out);
-    }
+    
 
-    Ok(HashMap::new())
+    // Ok(HashMap::new())
 }

@@ -34,7 +34,13 @@ impl AiModel {
     }
 
     pub fn predict(&mut self, features: Vec<f32>) -> Result<f32> {
-        assert_eq!(features.len(), self.feature_names.len());
+        if features.len() != self.feature_names.len() {
+            anyhow::bail!(
+                "Expected {} features, got {}",
+                self.feature_names.len(),
+                features.len()
+            );
+        }
 
         let input = Array2::from_shape_vec((1, features.len()), features)?;
 

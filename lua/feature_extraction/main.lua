@@ -36,7 +36,7 @@ function M.run()
     for _, extractor in ipairs(extractors) do
         extractor.extract(tx)
     end
-
+    ngx.ctx.tx = tx
     -- 3. LOG IT (dataset creation step)
     logger.write_async(tx)
 

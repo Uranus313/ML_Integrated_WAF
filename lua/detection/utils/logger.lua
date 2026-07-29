@@ -5,7 +5,7 @@ local M = {}
 
 local LOG_FILE = "logs/waf.jsonl"
 
-local function write(level, msg, data)
+local function write(entry)
 
 
      -- Acquire lock
@@ -37,12 +37,7 @@ local function write(level, msg, data)
         return false
     end
 
-    local entry = {
-        timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
-        level = level,
-        message = msg,
-        data = data
-    }
+    
 
     f:write(cjson.encode(entry), "\n")
     f:close()
@@ -57,13 +52,21 @@ end
 
 
 local function write_async(level, msg, data)
+    local entry = {
+        timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
+        level = level,
+        message = msg,
+        data = data
+    }
     ngx.timer.at(0, function()
-        write(level, msg, data)
+        write(entry)
     end)
+    return entry
 end
 
 
 function M.info(msg, data)
+    
     return write_async("INFO", msg, data)
 end
 
